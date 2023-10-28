@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Data Storage</title>
+    <style>
+        body {
+            background-image: url('https://cdn.pixabay.com/photo/2014/04/14/20/11/pink-324175_1280.jpg');
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.7);
+            max-width: 430px;
+            margin: 80px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        .form-control{
+            padding:10px;
+           width: 405px;
+            border-radius:20px;
+            margin-bottom:18px;
+        }
+        .btn{
+            background:green;
+            color:#fff;
+            width: 430px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 id="title">User Data Storage</h2>
+        <form id="myForm">
+          
+            <input type="text" id="nameInput" class="form-control" name="name" placeholder="Name" required>
+
+            
+            <input type="email" id="emailInput" name="email" class="form-control" placeholder="Email" required>
+
+            <button type="submit" value="submit" class="btn form-control">Submit</button>
+        </form>
+        <div id="userData">
+            <!-- User data will be displayed here -->
+        </div>
+    </div>
+
+  
+
+
+    <script src="domscale.js"></script>
+</body>
+</html>

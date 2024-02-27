@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+    <h1>Chat</h1>
+    <div id="messages"></div>
+    <form id="message-form">
+        <input type="text" id="messageInput" placeholder="Type your message..." required>
+        <button type="submit">Send</button>
+    </form>
+    </div>
+
+    <script>
+        const username = localStorage.getItem('username');
+        if (!username) {
+            window.location.href = '/login';
+        }
+
+        const messageForm = document.getElementById('message-form');
+        const messageInput = document.getElementById('messageInput');
+        const messagesDiv = document.getElementById('messages');
+
+        messageForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const message = messageInput.value.trim();
+            if (message) {
+                sendMessage(username, message);
+                messageInput.value = '';
+            }
+        });
+
+        function sendMessage(username, message) {
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, message })
+            })
+            .then(response => response.json())
+            .then(() => fetchMessages())
+            .catch(error => console.error('Error sending message:', error));
+        }
+
+        function fetchMessages() {
+            fetch('/get_messages')
+            .then(response => response.json())
+            .then(messages => {
+                messagesDiv.innerHTML = '';
+                for (const username in messages) {
+                    if (messages.hasOwnProperty(username)) {
+                        const message = messages[username];
+                        const messageElement = document.createElement('div');
+                        messageElement.textContent = `${username}: ${message}`;
+                        messagesDiv.appendChild(messageElement);
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching messages:', error));
+        }
+
+        // Fetch messages when the page loads
+        fetchMessages();
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+/* Reset default margin and padding */
+body, h1, form, input, button {
+    margin: 0;
+    padding: 0;
+}
+
+/* Apply some basic styling to the body */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+.form-control{
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+/* CSS styles for navigation menu */
+nav ul {
+    list-style-type: none; /* Remove bullet points */
+    margin: 0;
+    margin-bottom:20px;
+    background:black;
+    padding: 0;
+}
+
+nav ul li {
+    padding:8px;
+    display: inline-block; /* Display list items horizontally */
+    margin-right: 20px; /* Adjust spacing between list items */
+}
+
+nav ul li a {
+    text-decoration: none; /* Remove underline from links */
+    color: #fff; /* Set text color */
+   
+    font-size: 16px; /* Set font size */
+}
+
+nav ul li a:hover {
+    color: #fff; /* Change text color on hover */
+    text-decoration: underline; /* Add underline on hover */
+}
+ 
+/* Center the content in the container */
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the headings */
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Style the form */
+form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style the input fields */
+input[type="text"] {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Style the submit button */
+button[type="submit"] {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}

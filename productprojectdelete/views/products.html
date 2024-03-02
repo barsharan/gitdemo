@@ -1,0 +1,60 @@
+<!-- products.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <header>
+        <h1>All Products</h1>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/contactus">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Products</h2>
+        <div id="products-list">
+            <!-- Products will be dynamically inserted here -->
+        </div>
+    </div>
+    <script>
+        // Fetch products data from the server
+        fetch('/api/products')
+            .then(response => response.json())
+            .then(products => {
+                const productList = document.getElementById('products-list');
+                products.forEach(product => {
+                    const productElement = document.createElement('div');
+                    productElement.innerHTML = `
+                        <h3>${product.name}</h3>
+                        <p>Price: $${product.price}</p>
+                        <button onclick="deleteProduct(${product.id})">Delete</button>
+                    `;
+                    productList.appendChild(productElement);
+                });
+            })
+            .catch(error => console.error('Error fetching products:', error));
+
+        // Function to delete product
+        function deleteProduct(productId) {
+            fetch(`/delete/${productId}`, { method: 'DELETE' })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the page to reflect changes
+                        window.location.reload();
+                    } else {
+                        console.error('Failed to delete product:', response.statusText);
+                    }
+                })
+                .catch(error => console.error('Error deleting product:', error));
+        }
+    </script>
+</body>
+</html>

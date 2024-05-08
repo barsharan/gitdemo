@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="/public/css/main.css">
+</head>
+<body>
+    <div class="container">
+        <form onsubmit="handleSubmit(event)">
+        <label for="expAmount">Expense Amount</label>
+        <input type="number" id="expAmount" name="expAmount">
+         <label for="expDesc">Expense Description</label>
+        <input type="text" id="expDesc" name="expDesc">
+         <label for="expcategory">Choose a Category</label>
+         <select name="expcategory" id="expcategory">
+            <option value="null"></option>
+            <option value="Fuel">Fuel</option>
+            <option value="Food">Food</option>
+            <option value="Electricity">Electricity</option>
+            <option value="Movie">Movie</option>
+         </select>
+         <button type="submit" id="sBtn">Add Expense</button>
+        </form>
+    </div>
+    <div id="expensePage">
+        <h4 id="membership"></h4>
+        <button id="rzp-button1">Buy Premium</button>
+        <button onclick="download()"  id="downloadexpense">Download File</button>
+        <div id="expenses">
+        <ul id="expenseList">
+
+        </ul>
+        <div id="pagination-container">
+        <button type="button" id="previous-btn">previous</button>
+        <span id="page-num"></span>
+        <button type="button"id="next-btn">next</button>
+        <select name="row-per-page" id="rows-per-page">
+            <option value="0">row-per-page</option>
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+        </select>
+        </div>
+      
+       
+    </div>
+
+        <div id="leaderboard">
+
+        </div>
+        <div id="files">
+
+        </div>
+        
+        
+
+        
+
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js" integrity="sha512-PJa3oQSLWRB7wHZ7GQ/g+qyv6r4mbuhmiDb8BjSFZ8NZ2a42oTtAq5n0ucWAwcQDlikAtkub+tPVCw4np27WCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const token=localStorage.getItem('token');
+        const nextButton = document.getElementById('next-btn');
+        const prevButton = document.getElementById('previous-btn');
+        const pageNum = document.getElementById('page-num');
+        const expensesList = document.getElementById('expenses');
+        const pagination = document.getElementById('pagination-container');
+        const rowsPerPageOption = document.getElementById('rows-per-page');
+        let currentPage = 1;
+        let totalPages;
+        console.log(currentPage);
+        let  rowsPerPage = 3;
+        console.log(rowsPerPage);
+        function handleSubmit(event){
+           event.preventDefault();
+           
+            const amount=event.target.expAmount.value;
+            const description=event.target.expDesc.value;
+            const expensecat=event.target.expcategory.value;
+            const obj={
+                Amount:amount,
+                Description:description,
+                ExpenseCategory:expensecat
+
+            }
+            console.log(obj);
+        axios.post('http://localhost:3000/expense/add-expense',obj,
+        {headers:{
+                "Authorization":token
+            }
+        }
+    )
+            .then(response=>{
+                console.log(response.data.newExpenseDetails);
+                showExpenseDetails(response.data.newExpenseDetails);
+         }).catch(err=>{
+                console.log('axios error');
+                console.log(err)
+            });
+            document.getElementById('expAmount').value="";
+            document.getElementById('expDesc').value="";
+            document.getElementById('expcategory').value="";
+        }
+    
+        function showExpenseDetails(expense,currentPage,totalPages){
+            const expenseul=document.getElementById('expenseList');
+            const newLi=document.createElement('li');
+            newLi.textContent=`${expense.Amount}- ${expense.Description}- ${expense.Category}`;
+            const dltbtn=document.createElement('button');
+            dltbtn.id="delete";
+            dltbtn.textContent="Delete Expense";
+            
+            dltbtn.addEventListener('click',(eventclick)=>{
+                removeExpense(eventclick,expense)
+            }); 
+           
+            newLi.appendChild(dltbtn);   
+            expenseul.appendChild(newLi); 
+            const pageNum = document.getElementById('page-num');
+            pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+            currentPage = expense.currentPage;
+            pagination.style.display = 'flex';
+    }
+    function  showPremiumuserMessage(){
+        document.getElementById('rzp-button1').remove();
+        document.getElementById('membership').innerHTML="You are a Premium-User";
+        
+        showLeaderBoard();
+        
+    
+    }
+    function parseJwt (token) {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+}
+    window.addEventListener('DOMContentLoaded',()=>{
+         console.log("window content loader");
+         console.log(token);
+         const rowsPerPage=localStorage.getItem('rowsPerPage')
+        const decodeToken=parseJwt(token);
+        console.log(decodeToken);
+        if(decodeToken.isPremiumuser){
+            showPremiumuserMessage();
+            showAllDownloadedFiles();
+        }
+        const page=1;
+        axios.get(`http://localhost:3000/expense/get-expense?page=${page}&limit=${rowsPerPage}`,{
+            headers:{
+                "Authorization":token
+            }
+        })
+        .then(response=>{
+            console.log('response of get function');
+            console.log(response);
+            for(var i=0;i<response.data.allExpense.length;i++){
+                const currentp=response.data.currentPage;
+                totalPages=response.data.totalPages;
+                showExpenseDetails(response.data.allExpense[i],currentp,totalPages);
+                
+            }
+            if (currentPage === 1) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+
+            if (currentPage === totalPages) {
+                nextButton.disabled = true;
+                rowsPerPageOption.disabled = true;
+            } else {
+                nextButton.disabled = false;
+                rowsPerPageOption.disabled = false;
+            }
+
+           
+             
+        }).catch(err=>showError(err));
+    });
+    function removeExpense(eventclick,expense){
+        console.log(expense);
+     
+        axios.delete(`http://localhost:3000/expense/delete-expenses/${expense.id}`, {headers:{
+                "Authorization":token
+        },data:expense
+            })
+        .then(response=>{
+            console.log(response);
+            const expenseul=document.getElementById('expenseList');
+            expenseul.removeChild(eventclick.target.parentElement);
+            
+        }).catch(err=>showError(err));
+    }
+    function showError(err){
+    document.body.innerHTML += `<div style="color:red;"> ${err}</div>`
+}
+    function suggestPremiumMembership(){
+        const Message="You are not a premium user to Download file you should buy premium Membership "
+        document.body.innerHTML += `<div style="color:red;"> ${Message}</div>`
+     }
+     function  showAllDownloadedFiles(){
+        console.log('in showallDowloaded files')
+        axios.get("http://localhost:3000/expense/getfiles", { headers: {"Authorization" : token}})
+        .then(response=>{
+            console.log('response of get files');
+            console.log(response);
+            for(var i=0;i<response.data.filesData.length;i++){
+                const onDate=response.data.filesData[i].createdAt.split("T");
+                     console.log(onDate);
+
+                    const filesDiv=document.getElementById('files');
+                    filesDiv.innerHTML+=`<div><a href="${response.data.filesData[i].url}">file Downloaded on ${onDate[0]}</a></div>`
+            }
+        }).catch(err=>{
+            console.log(err);
+        })
+     }
+    
+
+ 
+    function download(){
+        const decodeToken=parseJwt(token);
+        console.log(decodeToken);
+        if(!decodeToken.isPremiumuser){
+            suggestPremiumMembership();
+        }
+        else{
+    axios.get('http://localhost:3000/expense/download', { headers: {"Authorization" : token} })
+    .then((response) => {
+        if(response.status === 201){
+            //the bcakend is essentially sending a download link
+            //  which if we open in browser, the file would download
+            console.log('response.data.fileURl');
+            console.log(response.data.fileURl);
+            var a = document.createElement("a");
+            a.href = response.data.fileURl.Location;
+            a.download = 'myexpense.csv';
+            a.click();
+        } else {
+            throw new Error(response.data.message)
+        }
+
+    })
+    .catch((err) => {
+        showError(err)
+    });
+}
+}
+    document.getElementById("rzp-button1")
+    .onclick=async function (e){
+      
+        const response=await axios.get('http://localhost:3000/purchase/premiummembership',
+    {
+        headers:{"Authorization":token}
+    });
+    console.log(response);
+    var options={"key":response.data.key_id,
+                "order_id":response.data.order.id,
+                 "handler":async function(response){
+                     await axios.post("http://localhost:3000/purchase/updateTransactionStatus",{
+                        order_id:options.order_id,
+                        payment_id:response.razorpay_payment_id,
+                     },{
+                        headers:{"Authorization":token}
+                     })
+                     alert("you are premium user now");
+                     showPremiumuserMessage();
+                    }
+            };
+            console.log(options.order_id);
+            const rzp1=new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+            rzp1.on("payment.failed",function(response){
+                console.log(response);
+                alert("something went wrong");
+            });
+
+    }
+    function showLeaderBoard(){
+     document.getElementById('leaderboard').innerHTML="";
+      const inputElement=document.createElement("input");
+        inputElement.type="button";
+        inputElement.value='show LeaderBoard';
+        inputElement.onclick=async ()=>{
+         
+            const userLeaderBoardArray= await axios.get("http://localhost:3000/premium/showLeaderBoard",{
+                headers:{
+                    "Authorization":token
+                }
+            })
+            console.log(userLeaderBoardArray);
+            var leaderboardElem=document.getElementById("leaderboard");
+            leaderboardElem.innerHTML="";
+            leaderboardElem.innerHTML+=`<h1>LeaderBoard<h1>`;
+                userLeaderBoardArray.data.forEach((userDetails) => {
+                    leaderboardElem.innerHTML+=`<li>Name-${userDetails.Name} Total Expenses-${userDetails.total_Expenses||0}`;
+                });
+            
+            }
+            document.getElementById('membership').appendChild(inputElement);
+        }
+nextButton.addEventListener('click', () => {
+    console.log('before',currentPage);
+    currentPage += 1;
+    console.log('after',currentPage);
+    console.log('in next button eventListener currenPage value',currentPage);
+    fetchExpenses(currentPage);
+});
+
+prevButton.addEventListener('click', () => {
+    console.log('before',currentPage);
+    currentPage -= 1;
+    console.log('after',currentPage);
+    console.log('in pre button eventListener currenPage value',currentPage);
+
+    fetchExpenses(currentPage);
+});
+
+rowsPerPageOption.addEventListener('change', () => {
+    rowsPerPage = parseInt(rowsPerPageOption.value);
+    localStorage.setItem('rowsPerPage', rowsPerPage);
+    fetchExpenses(currentPage);
+})
+
+// Function to fetch expenses for a specific page
+function fetchExpenses(page) {
+    const token = localStorage.getItem('token');
+    axios.get(`http://localhost:3000/expense/get-expense?page=${page}&limit=${rowsPerPage}`, {
+            headers: { Authorization: token },
+        })
+        .then((response) => {
+            console.log('response of fetch',response);
+            expenseList.innerHTML = '';
+            for(var i=0;i<response.data.allExpense.length;i++){
+                const currentp=response.data.currentPage;
+                const totalp=response.data.totalPages;
+                showExpenseDetails(response.data.allExpense[i], currentp,totalp)
+            }
+
+            const totalPages = response.data.totalPages;
+            currentPage = response.data.currentPage;
+
+            if (currentPage === 1) {
+                prevButton.disabled = true;
+            } else {
+                prevButton.disabled = false;
+            }
+
+            if (currentPage === totalPages) {
+                nextButton.disabled = true;
+                rowsPerPageOption.disabled = true;
+            } else {
+                nextButton.disabled = false;
+                rowsPerPageOption.disabled = false;
+            }
+
+            const pageNum = document.getElementById('page-num');
+            pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+        })
+        .catch((error) => console.log(error));
+}
+        
+    
+   
+    
+
+        
+    </script>
+</body>
+</html>

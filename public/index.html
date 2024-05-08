@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <!-- Add any additional stylesheets or scripts here -->
+</head>
+<body>
+  <h1>Expense Tracker</h1>
+
+  <!-- Form to add a new expense -->
+  <form id="expenseForm">
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description" required>
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" name="amount" required>
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+    <button type="submit">Add Expense</button>
+  </form>
+
+  <!-- Container to display existing expenses -->
+  <div id="expensesContainer">
+    <!-- Expenses will be dynamically added here -->
+  </div>
+
+  <!-- Add any additional scripts here -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const expenseForm = document.getElementById('expenseForm');
+      expenseForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Get form data
+        const description = document.getElementById('description').value;
+        const amount = document.getElementById('amount').value;
+        const date = document.getElementById('date').value;
+
+        // Create expense object
+        const expenseData = {
+          description: description,
+          amount: amount,
+          date: date
+        };
+
+        // Send POST request to add expense
+        fetch('/api/expenses', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(expenseData)
+        })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error('Failed to add expense');
+          }
+        })
+        .then(data => {
+          console.log('Expense added successfully:', data);
+          // Optionally, update UI to display newly added expense
+        })
+        .catch(error => {
+          console.error('Error adding expense:', error);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

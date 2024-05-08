@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance</title>
+    <link rel="stylesheet" href="/public/css/datepage.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+          <form onsubmit='handleSubmit(event)'>
+            <h5 id="start">Start Date</h5>
+            <input type="date" name="calender" id="calender">
+            <button onsubmit='handleSubmit()' id="searchbtn">Search</button>
+            <button id="fetchbtn">Fetch Attendance report</button>
+          </form>
+          </nav>
+        </header>
+        
+    <main>
+        <table>
+          <tr>
+            <td>Anita</td>
+            <td><input type="radio" class="radios" name="RN1"value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN1" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Ashwini</td>
+            <td><input type="radio" class="radios" name="RN2"  value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN2" value="absent" >Absent</td>
+          </tr>
+          <tr>
+            <td>Manisha</td>
+            <td><input type="radio" class="radios" name="RN3"  value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN3" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Marisha</td>
+            <td><input type="radio" class="radios" name="RN4" value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN4" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Akshay</td>
+            <td><input type="radio" class="radios" name="RN5" id="Attendance" value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN5" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Sunil</td>
+            <td><input type="radio" class="radios" name="RN6"  value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN6" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Sanjana</td>
+            <td><input type="radio" class="radios" name="RN7" value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN7" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>Nikhil</td>
+            <td><input type="radio" class="radios" name="RN8" value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN8" value="absent">Absent</td>
+          </tr>
+          <tr>
+            <td>mahima</td>
+            <td><input type="radio" class="radios" name="RN9"  value="Present">Present</td>
+            <td><input type="radio" class="radios"name="RN9" value="absent">Absent</td>
+          </tr>
+
+        </table>
+        <button id="markAbtn">Mark Attendance</button>
+    </main>
+    
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js" integrity="sha512-PJa3oQSLWRB7wHZ7GQ/g+qyv6r4mbuhmiDb8BjSFZ8NZ2a42oTtAq5n0ucWAwcQDlikAtkub+tPVCw4np27WCg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+   function handleSubmit(event){
+        event.preventDefault();
+        console.log('in handle submit function');
+        console.log(event.target.calender.value);
+        const date=event.target.calender.value
+        const ondate={
+            date:event.target.calender.value
+        }
+        axios.get(`http://localhost:3000/admin/${date}`,{
+            params:{
+                date:event.target.calender.value
+            }
+        })
+        .then(response=>{
+            console.log(response);
+            console.log('here is redirect page');
+            const date=response.data.date;
+            console.log(date);
+            var url='datepage.html?date='+encodeURIComponent(date);
+            console.log(url);
+             document.location.href=url;
+            console.log('after redirect page');
+        }).catch(err=>console.log(err));
+    }
+  window.onload = function () {
+        var url = document.location.href;
+        console.log(url);
+      var params = url.split('?')[1].split('&');
+        var data = {};
+            var tmp = params[0].split('=');
+             data = tmp[1];
+             //console.log(data);
+        document.getElementById('calender').value = data;
+    };
+</script>
+</html>
